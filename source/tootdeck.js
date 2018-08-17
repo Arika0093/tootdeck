@@ -151,7 +151,6 @@ $(function() {
 					ckey = value.keys[instance]
 					for (i in ckey.columns) {
 						var ret = addStramListener(instance, ckey.access_token, ckey.columns[i].stream, ckey.columns[i].column)
-						console.log(ret)
 						if (ret === false) {
 							ckey.columns.splice(i, 1)
 						}
@@ -198,25 +197,37 @@ function addStramListener(instance, access_token, tstream, column) {
 		return false;
 	}
 	line.empty()
-	console.log(wss)
-	var socket = new WebSocket(wss)
+
+	return connectionSocket(wss, line, local_mode, tstream, instance, access_token);
+}
+
+function connectionSocket(wss, line, local_mode, tstream, instance, access_token, count = 0) {
+	var socket = new WebSocket(wss);
+	var onCloseOrError = (...args) => {
+		console.log(count, args);
+		// 再接続を試みる
+		var RECONNECT_MAX = 10;
+		if (count <= RECONNECT_MAX){
+			connectionSocket(wss, line, local_mode, tstream, instance, access_token, count + 1);
+			return;
+		}
+	};
 	socket.targetdom = line;
 	socket.local_mode = local_mode;
 	socket.tstream = tstream;
-	socket.onmessage = function(event) {
+	// message recieved
+	socket.onmessage = function (event) {
 		var data = JSON.parse(event.data);
 		var payst = data.payload;
 		var payload = JSON.parse(payst);
-		if(typeof payload === 'number'){
-		return;
+		if (typeof payload === 'number') {
+			return;
 		}
-		var instanceurl = (function(uri) {
+		var instanceurl = (function (uri) {
 			return uri.split(':')[1].split(',')[0];
 		})(payload.uri);
-
 		//koko
-		var tootObj = converteContents(payload)
-
+		var tootObj = converteContents(payload);
 		if (this.local_mode) {
 			if (instanceurl.indexOf(local_mode.replace('https://', '//')) < 0) {
 				return;
@@ -225,47 +236,54 @@ function addStramListener(instance, access_token, tstream, column) {
 		if (this.targetdom.children().length > 200) {
 			this.targetdom.children().last().remove();
 		}
-		this.targetdom.prepend(parseContentsData(tootObj))
+		this.targetdom.prepend(parseContentsData(tootObj));
 	};
-	socket.onopen = function(event) {
-		var thistmp = this
-		var apipath = (function(param) {
+	// connection opened
+	socket.onopen = function (event) {
+		var thistmp = this;
+		var apipath = (function (param) {
 			return param == "user" ? "home" : "public";
-		})(this.tstream)
+		})(this.tstream);
 		$.ajax({
 			'url': instance + "api/v1/timelines/" + apipath,
 			"type": "GET",
 			"headers": {
 				'Authorization': "Bearer " + access_token
 			}
-		}).done(function(res) {
-			for (var index = res.length-1;index>=0;index--) {
+		}).done(function (res) {
+			// on connection successed, count reset
+			count = 0;
+			for (var index = res.length - 1; index >= 0; index--) {
 				if (apipath == "public") {
-			      // console.log(thistmp.local_mode)
+					// console.log(thistmp.local_mode)
 					if (thistmp.local_mode !== false) {
-				   // console.log(thistmp.local_mode)
-						var instanceurl = (function(uri) {
+						// console.log(thistmp.local_mode)
+						var instanceurl = (function (uri) {
 							return uri.split(':')[1].split(',')[0];
 						})(res[index].uri);
-						console.log(instanceurl)
-						if (instanceurl != thistmp.local_mode.replace('https://','').replace('/','')) {
+						console.log(instanceurl);
+						if (instanceurl != thistmp.local_mode.replace('https://', '').replace('/', '')) {
 							continue;
 						}
-						var tootObj = converteContents(res[index])
-						thistmp.targetdom.prepend(parseContentsData(tootObj))
-					} else {
-						var tootObj = converteContents(res[index])
-						thistmp.targetdom.prepend(parseContentsData(tootObj))
+						var tootObj = converteContents(res[index]);
+						thistmp.targetdom.prepend(parseContentsData(tootObj));
 					}
-				} else {
-					var tootObj = converteContents(res[index])
-					thistmp.targetdom.prepend(parseContentsData(tootObj))
+					else {
+						var tootObj = converteContents(res[index]);
+						thistmp.targetdom.prepend(parseContentsData(tootObj));
+					}
+				}
+				else {
+					var tootObj = converteContents(res[index]);
+					thistmp.targetdom.prepend(parseContentsData(tootObj));
 				}
 			}
-		})
+		});
 	};
-	socket.onclose = console.log;
-	socket.onerror = console.log;
+	// connecton closed/error occured
+	socket.onclose = onCloseOrError;
+	socket.onerror = onCloseOrError;
+	return socket;
 }
 
 function converteContents(payload) {
@@ -278,7 +296,6 @@ function converteContents(payload) {
 	if (payload.account.avatar == "/avatars/original/missing.png") {
 		payload.account.avatar = "https://" + instanceurl + payload.account.avatar
 	}
-	console.log(payload);
 	var tootObj = {
 			'userlink': payload.account.url,
 			'usericon': payload.account.avatar,
