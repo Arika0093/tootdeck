@@ -375,7 +375,9 @@ function addTootButton(keys) {
 				txarea.val("");
 				$(DOM.postbtns).addClass("is-disabled");
 				txarea.focus();
+				return false;
 			}
+			return true;
 		})
 		.on("keyup", function () {
 			var tx = txarea.val();
