@@ -352,7 +352,7 @@ function addTootButton(keys) {
 		var key = keys[instance] || {};
 		var button_h = `<div class="js-send-button-container spinner-button-container">
 		<button class="toot-button is-disabled js-send-button js-spinner-button js-show-tip Button--success btn-extra-height padding-v--6 padding-h--15"
-		data-original-title="Toot${index == 0 ? " (Alt + Enter)" : ""}" data-instance="${instance}" data-token="${key.access_token}">
+		data-original-title="Toot${index == 0 ? " (Shift+Enter)" : ""}" data-instance="${instance}" data-token="${key.access_token}">
 		Toot to ${instance.replace(/https?:/g, "").replace(/\//g, "")}</button>
 		<i class="js-compose-sending-success icon-center-16 compose-send-button-success icon icon-check is-hidden"></i>
 		<i class="js-spinner-button-active icon-center-16 spinner-button-icon-spinner is-hidden"></i> </div>`;
@@ -368,7 +368,7 @@ function addTootButton(keys) {
 	var button = $(".toot-button");
 	txarea
 		.on("keydown", function (e) {
-			if (e.keyCode == 13 && e.altKey) {
+			if (e.keyCode == 13 && e.shiftKey) {
 				var i = instances[0];
 				// toot use first account
 				postToot(i, keys[i].access_token, txarea.val());
