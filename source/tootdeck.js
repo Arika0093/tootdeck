@@ -366,23 +366,26 @@ function addTootButton(keys) {
 	// action adding
 	var txarea = $(DOM.textarea);
 	var button = $(".toot-button");
+	var txarea_changed = function () {
+		var tx = txarea.val();
+		button.toggleClass("is-disabled", (tx.length <= 0 || tx.length > 500));
+	};
 	txarea
 		.on("keydown", function (e) {
 			if (e.keyCode == 13 && e.shiftKey) {
 				var i = instances[0];
 				// toot use first account
 				postToot(i, keys[i].access_token, txarea.val());
-				txarea.val("");
+				txarea.val("").change();
 				$(DOM.postbtns).addClass("is-disabled");
 				txarea.focus();
-				return false;
+				return (e.ctrlKey);
 			}
 			return true;
 		})
-		.on("keyup", function () {
-			var tx = txarea.val();
-			button.toggleClass("is-disabled", (tx.length <= 0 || tx.length > 500));
-		});
+		.on("keyup", txarea_changed)
+		.on("change", txarea_changed);
+
 	button.on("click", function () {
 		var tx = txarea.val();
 		var btn = $(this);
@@ -392,7 +395,7 @@ function addTootButton(keys) {
 			// toot
 			postToot(i, t, tx);
 			// clear
-			txarea.val("");
+			txarea.val("").change();
 			$(DOM.postbtns).addClass("is-disabled");
 			txarea.focus();
 		}
