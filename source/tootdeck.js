@@ -15,6 +15,8 @@ const DOM = {
 	postbtn_field: "div.compose-content.antiscroll-wrap .cf.margin-b--30 .pull-right",
 	// ツイート内容を入力するbox
 	textarea: "textarea.compose-text",
+	// ツイートBoxとかがあるsectionの閉じるボタン
+	tweetarea_close: "div.attach-compose-buttons > button",
 	// 
 	postbtns: "button.js - send - button",
 	//
@@ -174,9 +176,12 @@ function postToot(instance, token, text){
 			'Authorization': "Bearer " + token
 		}
 	}).done(function (res) {
-		console.log(res);
-	});
 
+	});
+	// clear & close
+	$(DOM.textarea).val("").change();
+	$(DOM.postbtns).addClass("is-disabled");
+	$(DOM.tweetarea_close).click();
 }
 
 function addStramListener(instance, access_token, tstream, column) {
@@ -282,7 +287,7 @@ function connectionSocket(wss, line, local_mode, tstream, instance, access_token
 	};
 	// connecton closed/error occured
 	socket.onclose = onCloseOrError;
-	socket.onerror = onCloseOrError;
+	socket.onerror = console.log;
 	return socket;
 }
 
@@ -393,9 +398,6 @@ function addTootButton(keys) {
 				var i = instances[0];
 				// toot use first account
 				postToot(i, keys[i].access_token, txarea.val());
-				txarea.val("").change();
-				$(DOM.postbtns).addClass("is-disabled");
-				txarea.focus();
 				return (e.ctrlKey);
 			}
 			return true;
@@ -411,10 +413,6 @@ function addTootButton(keys) {
 			var t = btn.data("token");
 			// toot
 			postToot(i, t, tx);
-			// clear
-			txarea.val("").change();
-			$(DOM.postbtns).addClass("is-disabled");
-			txarea.focus();
 		}
 	});
 	return true;
@@ -423,7 +421,7 @@ function addTootButton(keys) {
 function parseContentsData(data) {
 	var baseHTML = '\
 <article class="stream-item js-stream-item  is-draggable  is-actionable" style="">\
-    <div class="js-stream-item-content item-box js-show-detail ">\
+    <div class="js-stream-item-content item-box ">\
 	<div class="js-tweet tweet is-favorite" style="margin-bottom: 1ex;">\
 	    <header class="tweet-header js-tweet-header flex flex-row flex-align--baseline">\
 		<a class="account-link link-complex block flex-auto url-ext" href="$userlink" data-full-url="$userlink" rel="url noopener noreferrer" target="_blank">\
