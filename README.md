@@ -28,6 +28,9 @@
 
 ![使用例](https://raw.githubusercontent.com/Arika0093/tootdeck/master/others/image2.png)
 
+### 簡易アップデートスクリプト
+`update.bat`を起動すると更新できます。
+
 ### 課題
 - 作成者が複垢持ってないのでちゃんと動作するかは不明。
 - boost/fav/rplyとかはまだ未実装。必要になったら実装。
