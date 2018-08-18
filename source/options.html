@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>tootdeck option page</title>
+		<style type="text/css">
+			body {
+				width: 350px;
+				height: 400px;
+				overflow-y: scroll;
+			}
+			#infos{
+				display: none;
+				background-color: #DFF;
+				padding: 1ex;
+			}
+			.setting{
+				text-align: center;
+			}
+			.setting p{
+				border-bottom: 1px solid #888;
+				margin-bottom: 0.5ex;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="infos">
+			<span id="caption">設定を変更した際はTweetdeckを再読み込みしてください。</span><br/>
+			<span id="information"></span>
+		</div>
+		<div class="setting" id="postkey">
+			<p>投稿キーの指定</p>
+			<input type="radio" id="postkey_shift" name="postkey" value="shiftKey" checked />
+			<label for="postkey_shift">Shift+Enter</label>
+			<input type="radio" id="postkey_alt" name="postkey" value="altKey" />
+			<label for="postkey_alt">Alt+Enter</label>
+		</div>
+		<div class="setting" id="tootbutton">
+			<p>tootボタンの位置</p>
+			<input type="radio" id="tootbutton_right" name="tootbutton" value="append" checked />
+			<label for="tootbutton_right">右側</label>
+			<input type="radio" id="tootbutton_left" name="tootbutton" value="prepend" />
+			<label for="tootbutton_left">左側</label>
+		</div>
+	</body>
+	<script src="./jquery.min.js"></script>
+	<script src="./options.js" ></script>
+</html>

@@ -27,7 +27,18 @@ const DOM = {
 	linedom: '.js-column-scroller.js-dropdown-container',
 };
 
+var SettingTarget = [
+	"postkey",
+	"tootbutton"
+];
+var Setting = {};
+
 $(function() {
+	// setting load
+	chrome.storage.local.get(SettingTarget, (vals) => {
+		Setting = vals;
+	});
+
 	setInterval(function() {
 		var bases = $(DOM.bases);
 		var b = $(DOM.mstdn_button)
@@ -384,23 +395,29 @@ function insertScript(code){
 // ----------------------------
 // rendering side
 function addTootButton(keys) {
+	var sup_k = Setting.postkey;
+	var btn_position = Setting.tootbutton;
+	var buttons_html = "";
 	var key_arrays = Object.keys(keys);
 	var instances = key_arrays.filter((e) => e != "tmpurl" && keys[e].access_token);
+	if ($(".toot-button").length) {
+		// existed
+		return false;
+	}
 	instances.forEach((instance, index) => {
 		var key = keys[instance] || {};
 		var button_h = `<div class="js-send-button-container spinner-button-container">
-		<button class="toot-button is-disabled js-send-button js-spinner-button js-show-tip Button--success btn-extra-height padding-v--6 padding-h--15"
-		data-original-title="Toot${index == 0 ? " (Shift+Enter)" : ""}" data-instance="${instance}" data-token="${key.access_token}">
-		Toot to ${instance.replace(/https?:/g, "").replace(/\//g, "")}</button>
-		<i class="js-compose-sending-success icon-center-16 compose-send-button-success icon icon-check is-hidden"></i>
-		<i class="js-spinner-button-active icon-center-16 spinner-button-icon-spinner is-hidden"></i> </div>`;
-		if ($(".toot-button").length) {
-			// existed
-			return false;
-		}
-		// add button
-		$(DOM.postbtn_field).append(button_h);
+			<button class="toot-button is-disabled js-send-button js-spinner-button js-show-tip
+			Button--success btn-extra-height padding-v--6 padding-h--15"
+			data-original-title="Toot${index == 0 ? ` (${sup_k.replace("Key", "")}+Enter)` : ""}"
+			data-instance="${instance}" data-token="${key.access_token}">
+			Toot to ${instance.replace(/https?:/g, "").replace(/\//g, "")}</button>
+			<i class="js-compose-sending-success icon-center-16 compose-send-button-success icon icon-check is-hidden"></i>
+			<i class="js-spinner-button-active icon-center-16 spinner-button-icon-spinner is-hidden"></i> </div>`;
+		buttons_html += button_h;
 	});
+	// add button
+	$(DOM.postbtn_field)[btn_position](buttons_html);
 	// action adding
 	var txarea = $(DOM.textarea);
 	var button = $(".toot-button");
@@ -410,7 +427,7 @@ function addTootButton(keys) {
 	};
 	txarea
 		.on("keydown", function (e) {
-			if (e.keyCode == 13 && e.shiftKey) {
+			if (e.keyCode == 13 && e[sup_k]) {
 				var i = instances[0];
 				// toot use first account
 				postToot(i, keys[i].access_token, txarea.val());
