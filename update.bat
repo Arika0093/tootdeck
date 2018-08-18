@@ -27,7 +27,7 @@ echo $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'			>
 echo [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols				>> _d.ps1
 echo [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy	>> _d.ps1
 echo Invoke-WebRequest -Uri %repository% -OutFile %rep_name%.zip				>> _d.ps1
-powershell -file d.ps1
+powershell -file _d.ps1
 
 ::Unzip
 echo ダウンロードしたzipファイルを解凍します。
