@@ -3,6 +3,9 @@
 		<meta charset="utf-8" />
 		<title>tootdeck option page</title>
 		<style type="text/css">
+			*, input{
+				font-family: "meiryo";
+			}
 			body {
 				width: 350px;
 				height: 400px;
@@ -16,9 +19,31 @@
 			.setting{
 				text-align: center;
 			}
-			.setting p{
+			.setting > p.caption{
 				border-bottom: 1px solid #888;
 				margin-bottom: 0.5ex;
+			}
+			p.small{
+				margin: 1px 0;
+				color: #444;
+				font-size: smaller;
+			}
+			ul#keys {
+				list-style-type: none;
+				text-align: left;
+				margin: 1ex 0;
+				padding: 0 1em;
+			}
+			.arrayitem {
+				padding: 0.5ex;
+				border: 1px solid #888;
+				margin: 3px 0;
+			}
+			input {
+				vertical-align: sub;
+			}
+			i.objectarraydelete {
+				float: right;
 			}
 		</style>
 	</head>
@@ -27,19 +52,33 @@
 			<span id="caption">設定を変更した際はTweetdeckを再読み込みしてください。</span><br/>
 			<span id="information"></span>
 		</div>
-		<div class="setting" id="postkey">
-			<p>投稿キーの指定</p>
+		<div class="setting">
+			<p class="caption">アカウント管理</p>
+			<p class="small">
+				チェック付きアカウントは投稿機能が有効になります。
+			</p>
+			<ul id="keys" class="ui-sortable">
+
+			</ul>
+		</div>
+		<div class="setting">
+			<p class="caption">投稿キーの指定</p>
 			<input type="radio" id="postkey_shift" name="postkey" value="shiftKey" checked />
 			<label for="postkey_shift">Shift+Enter</label>
 			<input type="radio" id="postkey_alt" name="postkey" value="altKey" />
 			<label for="postkey_alt">Alt+Enter</label>
 		</div>
-		<div class="setting" id="tootbutton">
-			<p>tootボタンの位置</p>
+		<div class="setting">
+			<p class="caption">tootボタンの位置</p>
 			<input type="radio" id="tootbutton_right" name="tootbutton" value="append" checked />
 			<label for="tootbutton_right">右側</label>
 			<input type="radio" id="tootbutton_left" name="tootbutton" value="prepend" />
 			<label for="tootbutton_left">左側</label>
+		</div>
+		<div class="setting">
+			<p class="caption">tootボタンのテキスト</p>
+			<p class="small">$instanceはインスタンスのURLに置き換えられます。</p>
+			<input type="text" id="tootbtnText" name="tootbtnText" placeholder="Toot to $instance" value="Toot to $instance" checked />
 		</div>
 	</body>
 	<script src="./jquery.min.js"></script>

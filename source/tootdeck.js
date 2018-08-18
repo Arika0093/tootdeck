@@ -20,7 +20,7 @@ const DOM = {
 	// ツイートBoxとかがあるsectionのstay open checkbox
 	tweet_stayopen: "input.js-compose-stay-open",
 	// 
-	postbtns: "button.js - send - button",
+	postbtns: "button.js-send-button",
 	//
 	line_base: "input.js-submittable-input.js-column-title-edit-box",
 	//
@@ -29,7 +29,9 @@ const DOM = {
 
 var SettingTarget = [
 	"postkey",
-	"tootbutton"
+	"tootbutton",
+	"tootbtnText",
+	"keys_selected"
 ];
 var Setting = {};
 
@@ -397,26 +399,32 @@ function insertScript(code){
 // ----------------------------
 // rendering side
 function addTootButton(keys) {
-	var sup_k = Setting.postkey || "shiftKey";
-	var btn_position = Setting.tootbutton || "append";
-	var buttons_html = "";
 	var key_arrays = Object.keys(keys);
 	var instances = key_arrays.filter((e) => e != "tmpurl" && keys[e].access_token);
+	var sup_k = Setting.postkey || "shiftKey";
+	var btn_position = Setting.tootbutton || "append";
+	var btn_text = Setting.tootbtnText || "Toot to $instance";
+	var key_sel = Setting.keys_selected || 0;
+	var buttons_html = "";
 	if ($(".toot-button").length) {
 		// existed
 		return false;
 	}
 	instances.forEach((instance, index) => {
+		if(index != key_sel){
+			return;
+		}
 		var key = keys[instance] || {};
+		var inst_short = instance.replace(/https?:/g, "").replace(/\//g, "");
 		var button_h = `<div class="js-send-button-container spinner-button-container">
 			<button class="toot-button is-disabled js-send-button js-spinner-button js-show-tip
 			Button--success btn-extra-height padding-v--6 padding-h--15"
-			data-original-title="Toot${index == 0 ? ` (${sup_k.replace("Key", "")}+Enter)` : ""}"
+			data-original-title="Toot (${sup_k.replace("Key", "")}+Enter)"
 			data-instance="${instance}" data-token="${key.access_token}">
-			Toot to ${instance.replace(/https?:/g, "").replace(/\//g, "")}</button>
+			${btn_text}</button>
 			<i class="js-compose-sending-success icon-center-16 compose-send-button-success icon icon-check is-hidden"></i>
 			<i class="js-spinner-button-active icon-center-16 spinner-button-icon-spinner is-hidden"></i> </div>`;
-		buttons_html += button_h;
+		buttons_html += button_h.replace(/\$instance/g, inst_short);
 	});
 	// add button
 	$(DOM.postbtn_field)[btn_position](buttons_html);
