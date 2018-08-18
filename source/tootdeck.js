@@ -318,6 +318,8 @@ function converteContents(payload) {
 	if (payload.account.avatar == "/avatars/original/missing.png") {
 		payload.account.avatar = "https://" + instanceurl + payload.account.avatar
 	}
+	//console.log(payload)
+	var unixtime = Math.floor(new Date(payload.created_at).getTime());
 	var tootObj = {
 			'userlink': payload.account.url,
 			'usericon': payload.account.avatar,
@@ -325,10 +327,10 @@ function converteContents(payload) {
 			'username': payload.account.display_name,
 			'posturl': payload.url,
 			'posttime': payload.created_at,
+			'posttime_int': unixtime,
 			'toot': payload.content,
 			'medias': payload.media_attachments,
 		}
-		// console.log(tootObj)
 	if (tootObj.usericon == "missing.png") {
 		tootObj.usericon = "";
 	}
@@ -395,8 +397,8 @@ function insertScript(code){
 // ----------------------------
 // rendering side
 function addTootButton(keys) {
-	var sup_k = Setting.postkey;
-	var btn_position = Setting.tootbutton;
+	var sup_k = Setting.postkey || "shiftKey";
+	var btn_position = Setting.tootbutton || "append";
 	var buttons_html = "";
 	var key_arrays = Object.keys(keys);
 	var instances = key_arrays.filter((e) => e != "tmpurl" && keys[e].access_token);
@@ -452,28 +454,34 @@ function addTootButton(keys) {
 }
 
 function parseContentsData(data) {
-	var baseHTML = '\
-<article class="stream-item js-stream-item  is-draggable  is-actionable" style="">\
-    <div class="js-stream-item-content item-box ">\
-	<div class="js-tweet tweet is-favorite" style="margin-bottom: 1ex;">\
-	    <header class="tweet-header js-tweet-header flex flex-row flex-align--baseline">\
-		<a class="account-link link-complex block flex-auto url-ext" href="$userlink" data-full-url="$userlink" rel="url noopener noreferrer" target="_blank">\
-		    <div class="obj-left item-img tweet-img position-rel"> <img class="tweet-avatar avatar  pin-top" src="$usericon" width="48" height="48" alt="$userid\'s avatar"> </div>\
-		    <div class="nbfc "> <span class="account-inline txt-ellipsis"> <b class="fullname link-complex-target">$username</b>   <span class="username txt-mute">@$userid</span> </span>\
-		    </div>\
-		</a>\
-	    </header>\
-	    <div class="tweet-body js-tweet-body">\
-		<p class="js-tweet-text tweet-text with-linebreaks " lang="ja">$toot\
-		</p>\
-		<div class="js-card-container margin-tm is-hidden"></div>\
-		$media\
-	    </div>\
-	    <footer class="tweet-footer cf">\
-	    </footer>\
-	</div>\
-    </div>\
-</article>'
+	var baseHTML = `
+<article class="stream-item js-stream-item  is-draggable  is-actionable" style="">
+    <div class="js-stream-item-content item-box ">
+	<div class="js-tweet tweet is-favorite" style="margin-bottom: 1ex;">
+	    <header class="tweet-header js-tweet-header flex flex-row flex-align--baseline">
+		<a class="account-link link-complex block flex-auto url-ext" href="${data.userlink}"
+		data-full-url="${data.userlink}" rel="url noopener noreferrer" target="_blank">
+			<div class="obj-left item-img tweet-img position-rel">
+			<img class="tweet-avatar avatar  pin-top" src="${data.usericon}" width="48" height="48" alt="${data.userid}'s avatar"> </div>
+			<div class="nbfc "> <span class="account-inline txt-ellipsis">
+			<b class="fullname link-complex-target">${data.username}</b>
+			<span class="username txt-mute">@${data.userid}</span> </span>
+		    </div>
+		</a>
+		<time class="tweet-timestamp js-timestamp txt-mute flex-shrink--0" datetime="${data.posttime}" data-time="${data.posttime_int}">
+		<a class="txt-size-variable--12 no-wrap" href="${data.posturl}" rel="url" target="_blank">now</a></time>
+	    </header>
+	    <div class="tweet-body js-tweet-body">
+		<p class="js-tweet-text tweet-text with-linebreaks " lang="ja">${data.toot}
+		</p>
+		<div class="js-card-container margin-tm is-hidden"></div>
+		$media
+	    </div>
+	    <footer class="tweet-footer cf">
+	    </footer>
+	</div>
+    </div>
+</article>`
 	var ms = data.medias;
 	if (ms && ms.length > 0){
 		var media_html = `
@@ -493,12 +501,5 @@ function parseContentsData(data) {
 		});
 		media_html += "</div></div></div>";
 	}
-	return baseHTML.replace(/\$userlink/g, data.userlink)
-		.replace(/\$usericon/g, data.usericon)
-		.replace(/\$userid/g, data.userid)
-		.replace(/\$username/g, data.username)
-		.replace(/\$posttime/g, data.posttime)
-		.replace(/\$poststaus/g, data.posturl)
-		.replace(/\$toot/g, data.toot)
-		.replace(/\$media/g, media_html || "")
+	return baseHTML.replace(/\$media/g, media_html || "")
 }
