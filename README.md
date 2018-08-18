@@ -4,8 +4,8 @@
 - pekko1215([@eakonnsamui](https://twitter.com/eakonnsamui))さん作
 
 ### 導入
-- [Releaseページ](https://github.com/Arika0093/tootdeck/releases)へ移動
-- ***Source code (zip)*** と書いてあるリンクをクリック、保存→解凍
+- ここから[ダウンロード](https://github.com/Arika0093/tootdeck/archive/master.zip)
+- ダウンロードしたファイルを解凍。
 - [Chrome拡張機能ページ](chrome://extensions/)を開き、デベロッパーモードをONにする
 - 中に入っていた`source`フォルダをchromeにドラッグ＆ドロップ
 - これで導入は完了。
