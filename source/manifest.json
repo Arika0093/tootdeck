@@ -9,14 +9,15 @@
     "name": "TootDeck",
     "version": "1",
     "permissions": [
+        "activeTab",
         "tabs",
         "storage",
         "https://*/*"
     ],
     "content_scripts":[
         {
-        "matches":["https://tweetdeck.twitter.com/"],
-        "js":["jquery.min.js","tootdeck.js"]
+            "matches":["https://tweetdeck.twitter.com/"],
+            "js":["jquery.min.js","tootdeck.js"]
          }
     ],
     "web_accessible_resources":[

@@ -17,6 +17,8 @@ const DOM = {
 	textarea: "textarea.compose-text",
 	// ツイートBoxとかがあるsectionの閉じるボタン
 	tweetarea_close: "div.attach-compose-buttons > button",
+	// ツイートBoxとかがあるsectionのstay open checkbox
+	tweet_stayopen: "input.js-compose-stay-open",
 	// 
 	postbtns: "button.js - send - button",
 	//
@@ -175,13 +177,17 @@ function postToot(instance, token, text){
 		"headers": {
 			'Authorization': "Bearer " + token
 		}
-	}).done(function (res) {
-
+	}).done(function (...res) {
 	});
 	// clear & close
-	$(DOM.textarea).val("").change();
+	$(DOM.textarea).val("");
+	insertScript(`
+		$("${DOM.textarea}").trigger("uiComposeTextChanged", [{ value: "" }]);
+	`);
 	$(DOM.postbtns).addClass("is-disabled");
-	$(DOM.tweetarea_close).click();
+	if(!$(DOM.tweet_stayopen).prop("checked")){
+		$(DOM.tweetarea_close).click();
+	}
 }
 
 function addStramListener(instance, access_token, tstream, column) {
@@ -365,6 +371,16 @@ var domStyleWatcher = {
 	}
 };
 
+
+// ----------------------------
+// script inside, for chrome extension
+function insertScript(code){
+	var script = document.createElement('script');
+	script.textContent = code;
+	(document.head || document.documentElement).appendChild(script);
+	script.remove();
+}
+
 // ----------------------------
 // rendering side
 function addTootButton(keys) {
@@ -389,7 +405,7 @@ function addTootButton(keys) {
 	var txarea = $(DOM.textarea);
 	var button = $(".toot-button");
 	var txarea_changed = function () {
-		var tx = txarea.val();
+		var tx = txarea.val().trim();
 		button.toggleClass("is-disabled", (tx.length <= 0 || tx.length > 500));
 	};
 	txarea
